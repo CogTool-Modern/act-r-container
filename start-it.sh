@@ -22,8 +22,8 @@ then
 elif [ "$1" = "run-jupyter.sh" ]
 then
 
-  sed -i -e "s/which_interface = 1/which_interface = 3/" -e "s/start-normal -->/start-normal/" -e "s/<\!-- end-normal/end-normal/" -e "s/<\!-- start-container/<\!-- start-container -->/" -e "s/end-container -->/<\!-- end-container -->/" -e "s/src=\"\/socket.io/src=\"socket.io/" actr7.x/examples/connections/nodejs/environment.html
-  sed -i -e "s/which_interface = 1/which_interface = 3/" -e "s/src=\"\/socket.io/src=\"socket.io/" actr7.x/examples/connections/nodejs/expwindow.html
+  sed -i -e "s/which_interface = 1/which_interface = 3/" -e "s/start-normal -->/start-normal/" -e "s/<\!-- end-normal/end-normal/" -e "s/<\!-- start-container/<\!-- start-container -->/" -e "s/end-container -->/<\!-- end-container -->/" actr7.x/examples/connections/nodejs/environment.html
+  sed -i -e "s/which_interface = 1/which_interface = 3/" actr7.x/examples/connections/nodejs/expwindow.html
  
   cp -n -r -t actr7.x/tutorial actr7.x/original-tutorial/*
 
@@ -35,8 +35,8 @@ then
 
 else 
 
-  sed -i -e "s/which_interface = 1/which_interface = 2/" -e "s/start-normal -->/start-normal/" -e "s/<\!-- end-normal/end-normal/" -e "s/<\!-- start-container/<\!-- start-container -->/" -e "s/end-container -->/<\!-- end-container -->/" -e "s/src=\"\/socket.io/src=\"socket.io/" actr7.x/examples/connections/nodejs/environment.html
-  sed -i -e "s/which_interface = 1/which_interface = 2/" -e "s/src=\"\/socket.io/src=\"socket.io/" actr7.x/examples/connections/nodejs/expwindow.html
+  sed -i -e "s/which_interface = 1/which_interface = 2/" -e "s/start-normal -->/start-normal/" -e "s/<\!-- end-normal/end-normal/" -e "s/<\!-- start-container/<\!-- start-container -->/" -e "s/end-container -->/<\!-- end-container -->/" actr7.x/examples/connections/nodejs/environment.html
+  sed -i -e "s/which_interface = 1/which_interface = 2/" actr7.x/examples/connections/nodejs/expwindow.html
   
   mv actr7.x/original-tutorial actr7.x/tutorial
 
