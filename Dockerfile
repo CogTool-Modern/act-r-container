@@ -12,9 +12,9 @@ RUN pip install --no-cache notebook numpy matplotlib scipy jupyter_server_proxy
 
 ARG NB_USER=actr
 ARG NB_UID=1000
-ENV USER ${NB_USER}
-ENV NB_UID ${NB_UID}
-ENV HOME /home/${NB_USER}
+ENV USER=${NB_USER}
+ENV NB_UID=${NB_UID}
+ENV HOME=/home/${NB_USER}
 
 RUN adduser --disabled-password \
     --gecos "Default user" \
