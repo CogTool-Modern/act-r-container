@@ -1,6 +1,7 @@
 {
   "name": "ACT-R Container",
   "description": "ACT-R running in a Docker container with the HTML ACT-R Environment web interface.",
+  "repository": "https://github.com/CogTool-Modern/act-r-container",
   "keywords": [
     "act-r",
     "cognitive-modeling",

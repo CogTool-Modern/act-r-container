@@ -28,7 +28,7 @@ JUPYTER_PORT=18888 docker compose --profile jupyter up --build jupyter
 
 ## Heroku
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://www.heroku.com/deploy)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://www.heroku.com/deploy?template=https://github.com/CogTool-Modern/act-r-container/tree/feature/docker-image-actr-environment)
 
 The included `heroku.yml` builds the `Dockerfile` as a Heroku `web` process and starts ACT-R in non-interactive web mode:
 
@@ -45,6 +45,8 @@ git push heroku main
 ```
 
 Heroku exposes one assigned HTTP `$PORT`, so this deploy targets the HTML ACT-R Environment. The raw ACT-R TCP interface on port 2650 is not exposed through Heroku's HTTP router; use a host that supports arbitrary TCP services if external access to that port is required.
+
+For forks, Heroku also supports a repo-agnostic button target of `https://www.heroku.com/deploy`, but that relies on GitHub sending a `Referer` header and can land on Heroku's unsupported button page when the repo cannot be inferred.
 
 Below are four ways that one could use this without having to rebuild the container.  The first two work online without needing to install any software using the mybinder and Play with Docker free services, and the other two require that one installs the Docker software.  If you have the Docker software you could also use these sources to build a custom version that includes additional models, notebooks, servers, etc.
 
