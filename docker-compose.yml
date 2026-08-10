@@ -1,0 +1,37 @@
+x-actr-base: &actr-base
+  build:
+    context: .
+  image: act-r-container:local
+  platform: ${DOCKER_PLATFORM:-linux/amd64}
+  init: true
+  stdin_open: true
+  tty: true
+
+services:
+  act-r:
+    <<: *actr-base
+    ports:
+      - "${ACTR_REMOTE_PORT:-2650}:2650"
+      - "${ACTR_HTML_PORT:-4000}:4000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:4000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  jupyter:
+    <<: *actr-base
+    profiles:
+      - jupyter
+    command: ["run-jupyter.sh"]
+    ports:
+      - "${JUPYTER_PORT:-8888}:8888"
+      - "${JUPYTER_ACTR_REMOTE_PORT:-2651}:2650"
+      - "${JUPYTER_ACTR_HTML_PORT:-4001}:4000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8888/"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s

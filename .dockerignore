@@ -1,0 +1,10 @@
+.git
+.agents
+.codex
+.DS_Store
+.env
+.env.*
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+act-r-tutorial/

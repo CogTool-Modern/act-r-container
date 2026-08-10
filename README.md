@@ -1,6 +1,51 @@
 # act-r-container
 Code to build a Docker container with ACT-R in it along with the Node.js server running to support the HTML versions of the ACT-R Environment and experiment window viewer.
 
+## Docker Compose
+
+The default compose service starts the ACT-R container without Jupyter. It exposes the ACT-R remote interface on port 2650 and the existing HTML ACT-R Environment on port 4000:
+
+```sh
+docker compose up --build act-r
+```
+
+Then open the HTML environment at http://localhost:4000, or connect another process to the ACT-R remote interface at localhost:2650.
+
+The Jupyter notebook interface is optional and runs under a compose profile:
+
+```sh
+docker compose --profile jupyter up --build jupyter
+```
+
+That exposes Jupyter at http://localhost:8888. Its ACT-R and HTML ports are mapped to localhost:2651 and http://localhost:4001 by default so it can run beside the default service without port conflicts.
+
+The port mappings can be changed with environment variables:
+
+```sh
+ACTR_REMOTE_PORT=12650 ACTR_HTML_PORT=14000 docker compose up --build act-r
+JUPYTER_PORT=18888 docker compose --profile jupyter up --build jupyter
+```
+
+## Heroku
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://www.heroku.com/deploy)
+
+The included `heroku.yml` builds the `Dockerfile` as a Heroku `web` process and starts ACT-R in non-interactive web mode:
+
+```sh
+heroku create --stack container
+git push heroku main
+```
+
+For an existing app, set the container stack before pushing:
+
+```sh
+heroku stack:set container
+git push heroku main
+```
+
+Heroku exposes one assigned HTTP `$PORT`, so this deploy targets the HTML ACT-R Environment. The raw ACT-R TCP interface on port 2650 is not exposed through Heroku's HTTP router; use a host that supports arbitrary TCP services if external access to that port is required.
+
 Below are four ways that one could use this without having to rebuild the container.  The first two work online without needing to install any software using the mybinder and Play with Docker free services, and the other two require that one installs the Docker software.  If you have the Docker software you could also use these sources to build a custom version that includes additional models, notebooks, servers, etc.
 
 1) From mybinder.org (or other BinderHub) to run ACT-R from Python in Jupyter notebooks without any local installation necessary.
