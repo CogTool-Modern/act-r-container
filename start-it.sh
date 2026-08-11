@@ -57,7 +57,7 @@ then
 
   prepare_tutorial_dir
 
-  PORT="${ACTR_HTML_PORT:-4000}" sbcl --non-interactive --load "quicklisp/setup.lisp" --load "actr7.x/load-act-r.lisp" --eval '(progn (init-des) (echo-act-r-output) (mp-print-versions) (run-node-env) (loop))' &
+  sbcl --non-interactive --load "quicklisp/setup.lisp" --load "actr7.x/load-act-r.lisp" --eval '(progn (init-des) (echo-act-r-output) (mp-print-versions) (loop))' &
 
   for _ in $(seq 1 60); do
     if [ -s "${HOME}/act-r-address.txt" ] && [ -s "${HOME}/act-r-port-num.txt" ]; then
