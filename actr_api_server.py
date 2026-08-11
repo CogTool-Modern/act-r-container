@@ -12,6 +12,7 @@ from __future__ import annotations
 import ipaddress
 import json
 import os
+import select
 import socket
 import threading
 import time
@@ -32,6 +33,8 @@ MAX_RUN_SECONDS = float(os.environ.get("ACTR_MAX_RUN_SECONDS", "60"))
 DEFAULT_RUN_SECONDS = float(os.environ.get("ACTR_DEFAULT_RUN_SECONDS", "5"))
 DOWNLOAD_TIMEOUT = float(os.environ.get("ACTR_DOWNLOAD_TIMEOUT", "15"))
 REMOTE_TIMEOUT = float(os.environ.get("ACTR_REMOTE_TIMEOUT", "30"))
+TRACE_DRAIN_QUIET_SECONDS = float(os.environ.get("ACTR_TRACE_DRAIN_QUIET_SECONDS", "0.25"))
+TRACE_DRAIN_MAX_SECONDS = float(os.environ.get("ACTR_TRACE_DRAIN_MAX_SECONDS", "3"))
 ALLOW_PRIVATE_URLS = os.environ.get("ACTR_ALLOW_PRIVATE_MODEL_URLS", "").lower() in {
     "1",
     "true",
@@ -88,15 +91,47 @@ class ActRRemote:
 
         while True:
             response = self.receive()
-            if response.get("id") != message_id:
+            if response.get("method"):
                 self.handle_callback(response)
                 continue
+            if response.get("id") != message_id:
+                raise ActRError(
+                    f"Received response for unexpected ACT-R request id {response.get('id')!r}."
+                )
 
             error = response.get("error")
             if error:
                 raise ActRError(error.get("message", str(error)))
 
             return response.get("result") or []
+
+    def drain_callbacks(
+        self,
+        quiet_seconds: float = TRACE_DRAIN_QUIET_SECONDS,
+        max_seconds: float = TRACE_DRAIN_MAX_SECONDS,
+    ) -> None:
+        deadline = time.monotonic() + max_seconds
+        original_timeout = self._socket.gettimeout()
+
+        try:
+            self._socket.settimeout(max(quiet_seconds, 0.1))
+            while time.monotonic() < deadline:
+                if MESSAGE_END not in self._buffer:
+                    wait_for = min(quiet_seconds, max(0.0, deadline - time.monotonic()))
+                    if wait_for <= 0:
+                        break
+                    readable, _, _ = select.select([self._socket], [], [], wait_for)
+                    if not readable:
+                        break
+
+                try:
+                    self.handle_callback(self.receive())
+                except ActRError as exc:
+                    if "Timed out waiting for ACT-R remote response" in str(exc):
+                        break
+                    raise
+        finally:
+            self._socket.settimeout(original_timeout)
 
     def send(self, method: str, *params: Any, request_id: int | None) -> None:
         payload = {"method": method, "params": list(params), "id": request_id}
@@ -200,6 +235,7 @@ class ActRRunner:
             phase = "run"
             client.evaluate("reset")
             run_result = client.evaluate("run", run_seconds, real_time)
+            client.drain_callbacks()
 
             return {
                 "ok": True,
