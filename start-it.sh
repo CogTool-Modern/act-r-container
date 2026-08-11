@@ -57,7 +57,23 @@ then
 
   prepare_tutorial_dir
 
-  sbcl --non-interactive --load "quicklisp/setup.lisp" --load "actr7.x/load-act-r.lisp" --eval '(progn (init-des) (echo-act-r-output) (mp-print-versions) (loop))' &
+  ACTR_REMOTE_INTERNAL_PORT="${ACTR_REMOTE_INTERNAL_PORT:-12650}"
+  case "${ACTR_REMOTE_INTERNAL_PORT}" in
+    ''|*[!0-9]*)
+      echo "ACTR_REMOTE_INTERNAL_PORT must be numeric." >&2
+      exit 1
+      ;;
+  esac
+
+  if [ -n "${PORT:-}" ] && [ "${ACTR_REMOTE_INTERNAL_PORT}" = "${PORT}" ]; then
+    if [ "${PORT}" = "12650" ]; then
+      ACTR_REMOTE_INTERNAL_PORT=12651
+    else
+      ACTR_REMOTE_INTERNAL_PORT=12650
+    fi
+  fi
+
+  sbcl --non-interactive --eval '(pushnew :standalone *features*)' --load "quicklisp/setup.lisp" --load "actr7.x/load-act-r.lisp" --eval "(progn (start-des nil nil ${ACTR_REMOTE_INTERNAL_PORT}) (echo-act-r-output) (mp-print-versions) (loop))" &
 
   for _ in $(seq 1 60); do
     if [ -s "${HOME}/act-r-address.txt" ] && [ -s "${HOME}/act-r-port-num.txt" ]; then
