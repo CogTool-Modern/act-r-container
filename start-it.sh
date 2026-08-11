@@ -73,6 +73,21 @@ then
     fi
   fi
 
+  python3 "${HOME}/actr_api_server.py" &
+  API_PID="$!"
+  API_PORT="${PORT:-8080}"
+
+  for _ in $(seq 1 60); do
+    if ! kill -0 "${API_PID}" 2>/dev/null; then
+      wait "${API_PID}"
+      exit "$?"
+    fi
+    if python3 -c "import socket; s=socket.create_connection(('127.0.0.1', int('${API_PORT}')), timeout=1); s.close()" 2>/dev/null; then
+      break
+    fi
+    sleep 1
+  done
+
   sbcl --non-interactive --eval '(pushnew :standalone *features*)' --load "quicklisp/setup.lisp" --load "actr7.x/load-act-r.lisp" --eval "(progn (start-des nil nil ${ACTR_REMOTE_INTERNAL_PORT}) (echo-act-r-output) (mp-print-versions) (loop))" &
 
   for _ in $(seq 1 60); do
@@ -82,7 +97,7 @@ then
     sleep 1
   done
 
-  exec python3 "${HOME}/actr_api_server.py"
+  wait "${API_PID}"
 
 else 
 

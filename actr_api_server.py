@@ -397,9 +397,13 @@ class RequestHandler(BaseHTTPRequestHandler):
         print("%s - %s" % (self.address_string(), fmt % args), flush=True)
 
 
+class ReusableThreadingHTTPServer(ThreadingHTTPServer):
+    allow_reuse_address = True
+
+
 def main() -> int:
     port = int(os.environ.get("PORT", "8080"))
-    server = ThreadingHTTPServer(("0.0.0.0", port), RequestHandler)
+    server = ReusableThreadingHTTPServer(("0.0.0.0", port), RequestHandler)
     print(f"ACT-R API server listening on port {port}", flush=True)
     server.serve_forever()
     return 0
