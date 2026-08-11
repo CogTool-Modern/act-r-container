@@ -2,4 +2,4 @@ build:
   docker:
     web: Dockerfile
 run:
-  web: /start-it.sh heroku-web
+  web: /start-it.sh heroku-api

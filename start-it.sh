@@ -52,6 +52,22 @@ then
 
   exec sbcl --non-interactive --load "quicklisp/setup.lisp" --load "actr7.x/load-act-r.lisp" --eval '(progn (init-des) (echo-act-r-output) (mp-print-versions) (run-node-env) (loop))'
 
+elif [ "$1" = "heroku-api" ]
+then
+
+  prepare_tutorial_dir
+
+  PORT="${ACTR_HTML_PORT:-4000}" sbcl --non-interactive --load "quicklisp/setup.lisp" --load "actr7.x/load-act-r.lisp" --eval '(progn (init-des) (echo-act-r-output) (mp-print-versions) (run-node-env) (loop))' &
+
+  for _ in $(seq 1 60); do
+    if [ -s "${HOME}/act-r-address.txt" ] && [ -s "${HOME}/act-r-port-num.txt" ]; then
+      break
+    fi
+    sleep 1
+  done
+
+  exec python3 "${HOME}/actr_api_server.py"
+
 else 
 
   sed -i -e "s/which_interface = 1/which_interface = 2/" -e "s/start-normal -->/start-normal/" -e "s/<\!-- end-normal/end-normal/" -e "s/<\!-- start-container/<\!-- start-container -->/" -e "s/end-container -->/<\!-- end-container -->/" actr7.x/examples/connections/nodejs/environment.html

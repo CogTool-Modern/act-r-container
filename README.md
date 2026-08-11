@@ -30,7 +30,7 @@ JUPYTER_PORT=18888 docker compose --profile jupyter up --build jupyter
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://www.heroku.com/deploy?template=https://github.com/CogTool-Modern/act-r-container/tree/feature/docker-image-actr-environment)
 
-The included `heroku.yml` builds the `Dockerfile` as a Heroku `web` process and starts ACT-R in non-interactive web mode:
+The included `heroku.yml` builds the `Dockerfile` as a Heroku `web` process and starts the ACT-R model runner API:
 
 ```sh
 heroku create --stack container
@@ -44,7 +44,17 @@ heroku stack:set container
 git push heroku main
 ```
 
-Heroku exposes one assigned HTTP `$PORT`, so this deploy targets the HTML ACT-R Environment. The raw ACT-R TCP interface on port 2650 is not exposed through Heroku's HTTP router; use a host that supports arbitrary TCP services if external access to that port is required.
+Heroku exposes one assigned HTTP `$PORT`, so this deploy targets the model runner API. The raw ACT-R TCP interface on port 2650 is not exposed through Heroku's HTTP router; use a host that supports arbitrary TCP services if external access to that port is required.
+
+Run a model by sending the URL of a Lisp model file:
+
+```sh
+curl -X POST "https://YOUR-HEROKU-APP.herokuapp.com/run-model" \
+  -H "Content-Type: application/json" \
+  -d '{"model_url":"https://example.com/addition.lisp","run_seconds":5}'
+```
+
+The response includes `ok`, the loaded model name, `run_result`, and the captured ACT-R trace output. Treat `model_url` as code execution: the API rejects private/local URLs by default and applies size and run-time limits, but untrusted Lisp should still be run only in a disposable, least-privilege container.
 
 For forks, Heroku also supports a repo-agnostic button target of `https://www.heroku.com/deploy`, but that relies on GitHub sending a `Referer` header and can land on Heroku's unsupported button page when the repo cannot be inferred.
 
